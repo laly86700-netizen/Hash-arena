@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ساحة هاش | المسابقات</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f0f8f7;--card:#fff;--text:#0b2530;--muted:#52707a;--accent:#0d9488;--ok:#12a150;--bad:#d93a3a;--line:#e1e5f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#08171d;--card:#0f2730;--text:#e8f7f7;--muted:#8fb3b8;--accent:#14b8a6;--ok:#3ddc84;--bad:#ff6b6b;--line:#2a2f52}}
+:root[data-theme="dark"]{--bg:#08171d;--card:#0f2730;--text:#e8f7f7;--muted:#8fb3b8;--accent:#14b8a6;--ok:#3ddc84;--bad:#ff6b6b;--line:#2a2f52}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center}
+.wrap{width:100%;max-width:560px;padding:20px 16px 32px}
+h1{font-size:24px;margin:8px 0 2px;text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 18px;font-size:14px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;text-align:center}
+.tag{display:inline-block;background:var(--accent);color:#fff;border-radius:99px;padding:3px 12px;font-size:12px;margin-bottom:14px}
+.q{font-size:19px;line-height:1.7;margin:0 0 18px}
+.emo{font-size:46px;letter-spacing:6px;margin:6px 0 18px}
+.opts{display:grid;gap:10px}
+button{font:inherit;color:var(--text);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:13px;font-size:17px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}
+button.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,transparent)}
+.two{grid-template-columns:1fr 1fr}
+.fb{margin-top:16px;padding:12px;border-radius:12px;background:var(--bg);line-height:1.7;font-size:15px;display:none;text-align:right}
+.next{margin-top:14px;width:100%;background:var(--accent);border-color:var(--accent);color:#fff;display:none}
+.score{font-size:54px;margin:6px 0}
+.tm{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:-4px 0 16px}.tm i{display:block;height:100%;width:100%;background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎯 ساحة هاش</h1>
+  <p class="sub">نادي هاش · ١٥ ثانية لكل سؤال ⏱️</p>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="meta"><span id="count"></span><span id="pts"></span></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var items=[
+{t:"tf",q:"أول «باغ» في تاريخ الحاسوب كان حشرة حقيقية علقت داخل جهاز.",a:true,e:"صح! في 1947 وجد فريق غريس هوبر عثة عالقة في جهاز Harvard Mark II ولصقوها في السجل 🦋"},
+{t:"tf",q:"كلمة المرور «123456» ما زالت من أكثر كلمات المرور استخدامًا في العالم.",a:true,e:"صح! تتصدر القوائم منذ سنين، وتُخترق في أقل من ثانية 🔓"},
+{t:"tf",q:"أول فأرة حاسوب كانت مصنوعة من الحديد.",a:false,e:"خدعة! كانت من الخشب، واخترعها دوغلاس إنجلبارت عام 1964 🪵🖱️"},
+{t:"emo",e1:"🧠 + 🤖",opts:["الذكاء الاصطناعي","تطوير الألعاب","الشبكات"],a:0,e:"عقل + روبوت = الذكاء الاصطناعي"},
+{t:"emo",e1:"🔒 + 🛡️ + 💻",opts:["تصميم الواجهات","الأمن السيبراني","الحوسبة السحابية"],a:1,e:"قفل + درع + جهاز = الأمن السيبراني"},
+{t:"emo",e1:"📊 + 🔍 + 📈",opts:["تحليل البيانات","التسويق الرقمي","الروبوتات"],a:0,e:"رسم بياني + بحث + منحنى = تحليل البيانات"},
+{t:"tf",q:"كلمة Wi-Fi اختصار لعبارة Wireless Fidelity.",a:false,e:"خدعة! هي اسم تجاري فقط ولا تمثل اختصارًا لشيء، والعبارة انتشرت بالتسويق 📶"},
+{t:"tf",q:"لغة البرمجة Python سُميت على اسم الثعبان.",a:false,e:"خدعة! سُميت تيمنًا بفرقة الكوميديا البريطانية Monty Python 🎭🐍"},
+{t:"tf",q:"أول رسالة نصية SMS في التاريخ كانت تهنئة بالكريسماس.",a:true,e:"صح! أُرسلت عام 1992 وكان نصها Merry Christmas 🎄📱"},
+{t:"tf",q:"رمز @ دخل عالم البريد الإلكتروني منذ أولى رسائله عام 1971.",a:true,e:"صح! اختاره راي توملينسون ليفصل بين اسم المستخدم واسم الجهاز 📧"},
+{t:"emo",e1:"☁️ + 💾",opts:["الحوسبة السحابية","الأمن السيبراني","الأجهزة الذكية"],a:0,e:"سحابة + تخزين = الحوسبة السحابية"},
+{t:"emo",e1:"📱 + 🧑‍💻",opts:["تحليل البيانات","تطوير تطبيقات الجوال","الشبكات"],a:1,e:"جوال + مبرمج = تطوير تطبيقات الجوال"},
+{t:"emo",e1:"🎮 + 👨‍💻",opts:["تطوير الألعاب","الذكاء الاصطناعي","الروبوتات"],a:0,e:"يد تحكم + مبرمج = تطوير الألعاب"},
+{t:"emo",e1:"🎨 + 📱 + ✏️",opts:["الأمن السيبراني","قواعد البيانات","تصميم تجربة المستخدم UI/UX"],a:2,e:"ألوان + شاشة + قلم = تصميم الواجهات وتجربة المستخدم"}
+];
+var i=0,score=0,done=false;
+var card=document.getElementById("card");
+function el(h){return h}
+function render(){
+  if(i>=items.length){return end()}
+  var it=items[i];done=false;clearInterval(tid);
+  document.getElementById("bar").style.width=(i/items.length*100)+"%";
+  document.getElementById("count").textContent="السؤال "+(i+1)+" من "+items.length;
+  document.getElementById("pts").textContent="النقاط: "+score;
+  var h='<div class="tm"><i id="tm"></i></div>';
+  if(it.t==="tf"){
+    h='<span class="tag">حقيقة أم خدعة؟</span><p class="q">'+it.q+'</p><div class="opts two"><button data-v="1">✅ حقيقة</button><button data-v="0">❌ خدعة</button></div>';
+  }else{
+    h='<span class="tag">فك الشفرة</span><div class="emo">'+it.e1+'</div><div class="opts">'+it.opts.map(function(o,k){return '<button data-v="'+k+'">'+o+'</button>'}).join("")+'</div>';
+  }
+  h+='<div class="fb" id="fb"></div><button class="next" id="next">'+(i===items.length-1?"النتيجة 🏆":"التالي ←")+'</button>';
+  card.innerHTML=h;
+  var bs=card.querySelectorAll(".opts button");
+  for(var k=0;k<bs.length;k++){bs[k].onclick=pick}
+  document.getElementById("next").onclick=function(){i++;render()};
+  startTimer();
+}
+var T=15000,tid,t0;
+function startTimer(){t0=Date.now();var b=document.getElementById("tm");tid=setInterval(function(){var r=1-(Date.now()-t0)/T;if(r<=0){clearInterval(tid);b.style.width="0%";timeUp();return}b.style.width=(r*100)+"%";if(r<0.34)b.style.background="var(--bad)"},100)}
+function timeUp(){if(done)return;done=true;var it=items[i];var bs=card.querySelectorAll(".opts button");for(var k=0;k<bs.length;k++){var bv=Number(bs[k].getAttribute("data-v"));var r=it.t==="tf"?(bv===1)===it.a:bv===it.a;if(r)bs[k].classList.add("ok");bs[k].disabled=true}var fb=document.getElementById("fb");fb.style.display="block";fb.textContent="⏰ انتهى الوقت! "+it.e;document.getElementById("next").style.display="block"}
+function pick(ev){
+  if(done)return;done=true;clearInterval(tid);
+  var it=items[i],b=ev.currentTarget,v=Number(b.getAttribute("data-v"));
+  var right=it.t==="tf"?(v===1)===it.a:v===it.a;
+  var bs=card.querySelectorAll(".opts button");
+  for(var k=0;k<bs.length;k++){
+    var bv=Number(bs[k].getAttribute("data-v"));
+    var isRight=it.t==="tf"?(bv===1)===it.a:bv===it.a;
+    if(isRight)bs[k].classList.add("ok");
+    bs[k].disabled=true;
+  }
+  if(right){score++}else{b.classList.add("bad")}
+  var fb=document.getElementById("fb");
+  fb.style.display="block";
+  fb.textContent=(right?"🎉 إجابة صحيحة! ":"😅 قريب! ")+it.e;
+  document.getElementById("next").style.display="block";
+  document.getElementById("pts").textContent="النقاط: "+score;
+}
+var DB_URL="https://hash-arena-b3e8a-default-rtdb.firebaseio.com";var gt=0,es=0,sent=false;
+function sendScore(n){
+  if(!DB_URL||sent)return;sent=true;
+  var b=document.getElementById("badge");
+  fetch(DB_URL+"/scores.json",{method:"POST",body:JSON.stringify({n:n,s:score,t:es,ts:Date.now()})})
+  .then(function(r){b.textContent+=r.ok?" ✅ تم الإرسال":" ⚠️ تعذر الإرسال"})
+  .catch(function(){b.textContent+=" ⚠️ تعذر الإرسال"});
+}
+function end(){clearInterval(tid);es=Math.round((Date.now()-gt)/1000);sent=false;
+  document.getElementById("bar").style.width="100%";
+  document.getElementById("count").textContent="انتهت الجولة";
+  var m=score===items.length?"أسطورة هاش! 🔥":score>=items.length*0.65?"أداء قوي 👏":"جرّب مرة ثانية 💪";
+  card.innerHTML='<span class="tag">النتيجة</span><div class="score">'+score+' / '+items.length+'</div><p class="q">'+m+'</p><input id="nm" maxlength="20" placeholder="اكتب اسمك" style="width:100%;padding:12px;font:inherit;font-size:17px;text-align:center;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--text)"><button class="next" style="display:block" id="show">اعرض بطاقتي 🏅</button><div id="badge" style="margin-top:14px;font-size:20px;line-height:1.8"></div><button class="next" style="display:block;background:transparent;color:var(--text);border-color:var(--line)" id="again">إعادة اللعب 🔄</button>';
+  document.getElementById("show").onclick=function(){var n=document.getElementById("nm").value.trim()||"لاعب";var b=document.getElementById("badge");sendScore(n);b.textContent="🏅 "+n+" — "+score+" / "+items.length+" — أرِ المقدم هذي الشاشة";};
+  document.getElementById("again").onclick=function(){i=0;score=0;gt=Date.now();render()};
+}
+gt=Date.now();render();
+</script>
+</body>
+</html>
